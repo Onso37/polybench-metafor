@@ -99,6 +99,7 @@
 
 !$pragma scop
         do t = 1, _PB_TSTEPS
+!$OMP PARALLEL DO PRIVATE(i2) SCHEDULE(STATIC)
           do i1 = 1, _PB_N
             do i2 = 2, _PB_N
               x(i2, i1) = x(i2, i1) - ((x(i2 - 1, i1) * a(i2, i1)) / &
@@ -107,12 +108,16 @@
                           b(i2 - 1, i1))
             end do
           end do
+!$OMP END PARALLEL DO
 
+!$OMP PARALLEL DO SCHEDULE(STATIC)
           do i1 = 1, _PB_N
             x(_PB_N, i1) = x(_PB_N, i1) / b(_PB_N, i1)
           end do
+!$OMP END PARALLEL DO
 
-          do i1 = 1, _PB_N 
+!$OMP PARALLEL DO PRIVATE(i2) SCHEDULE(STATIC)
+          do i1 = 1, _PB_N
             do i2 = 1, _PB_N - 2
               x(_PB_N - i2, i1) = (x(_PB_N - i2, i1) - &
                                     (x(_PB_N - i2 - 1, i1) * &
@@ -120,8 +125,10 @@
                                     b(_PB_N - i2 - 1, i1)
             end do
           end do
+!$OMP END PARALLEL DO
 
-          do i1 = 2, _PB_N 
+!$OMP PARALLEL DO PRIVATE(i2) SCHEDULE(STATIC)
+          do i1 = 2, _PB_N
             do i2 = 1, _PB_N 
               x(i2, i1) = x(i2, i1) - x(i2, i1 - 1) * a(i2, i1) / &
                           b(i2, i1 - 1)
@@ -130,11 +137,15 @@
               
             end do
           end do
+!$OMP END PARALLEL DO
 
+!$OMP PARALLEL DO SCHEDULE(STATIC)
           do i2 = 1, _PB_N
             x(i2, _PB_N) = x(i2, _PB_N) / b(i2, _PB_N)
           end do
+!$OMP END PARALLEL DO
 
+!$OMP PARALLEL DO PRIVATE(i2) SCHEDULE(STATIC)
           do i1 = 1, _PB_N - 2
             do i2 = 1, _PB_N
               x(i2, _PB_N - i1) = (x(i2, _PB_N - i1) - &
@@ -143,6 +154,7 @@
                                     b(i2, _PB_N - i1)
             end do
           end do
+!$OMP END PARALLEL DO
         end do
 !$pragma endscop
         end subroutine

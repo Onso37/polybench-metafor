@@ -103,6 +103,7 @@
 !$pragma scop
         b(1) = 1.0D0
         do i = 1, _PB_N 
+!$OMP PARALLEL DO PRIVATE(k, w) SCHEDULE(STATIC)
           do j = i + 1, _PB_N + 1
             w = a(i, j)
             do k = 1, i - 1
@@ -110,6 +111,8 @@
             end do
             a(i, j) = w / a(i, i)
           end do
+!$OMP END PARALLEL DO
+!$OMP PARALLEL DO PRIVATE(k, w) SCHEDULE(STATIC)
           do j = i + 1, _PB_N + 1
             w = a(j, i + 1)
             do k = 1, i
@@ -117,6 +120,7 @@
             end do
             a(j, i + 1) = w
           end do
+!$OMP END PARALLEL DO
         end do
         y(1) = b(1)
         do i = 2, _PB_N + 1

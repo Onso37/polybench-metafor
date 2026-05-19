@@ -135,6 +135,7 @@
         integer :: i, j, k
 
 !$pragma scop
+!$OMP PARALLEL DO PRIVATE(j, k) SCHEDULE(STATIC)
         do i = 1, _PB_NI
           do j = 1, _PB_NJ
             tmp(j,i) = 0.0
@@ -143,7 +144,9 @@
             end do
           end do
         end do
+!$OMP END PARALLEL DO
 
+!$OMP PARALLEL DO PRIVATE(j, k) SCHEDULE(STATIC)
         do i = 1, _PB_NI
           do j = 1, _PB_NL
             d(j,i) = d(j,i) * beta
@@ -152,6 +155,7 @@
             end do
           end do
         end do
+!$OMP END PARALLEL DO
 !$pragma endscop
         end subroutine 
 

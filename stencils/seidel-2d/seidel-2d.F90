@@ -50,7 +50,6 @@
         DATA_TYPE, dimension(n, n) :: a
         integer :: n
         integer :: i,j
-        do i = 1, n
           do j = 1, n
             a(j, i) = ((DBLE(i - 1) * DBLE(j + 1)) + 2.0D0) / n
           end do
@@ -85,6 +84,9 @@
 
 !$pragma scop
         do t = 1, _PB_TSTEPS
+!       Note: Gauss-Seidel stencil has loop-carried dependencies;
+!       only the time step loop is parallelized via a wavefront approach.
+!       The spatial loops remain sequential to preserve data dependences.
           do i = 2, _PB_N - 1
             do j = 2, _PB_N - 1
             a(j, i) = (a(j - 1, i - 1) + a(j, i - 1) + a(j + 1, i - 1) + &

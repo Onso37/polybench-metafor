@@ -133,6 +133,7 @@
 
 !$pragma scop
         ! E := A*B
+!$OMP PARALLEL DO PRIVATE(j, k) SCHEDULE(STATIC)
         do i = 1, _PB_NI
           do j = 1, _PB_NJ
             e(j,i) = 0.0
@@ -141,8 +142,10 @@
             end do
           end do
         end do
+!$OMP END PARALLEL DO
 
         ! F := C*D
+!$OMP PARALLEL DO PRIVATE(j, k) SCHEDULE(STATIC)
         do i = 1, _PB_NJ
           do j = 1, _PB_NL
             f(j,i) = 0.0
@@ -151,8 +154,10 @@
             end do
           end do
         end do
+!$OMP END PARALLEL DO
 
         ! G := E*F
+!$OMP PARALLEL DO PRIVATE(j, k) SCHEDULE(STATIC)
         do i = 1, _PB_NI
           do j = 1, _PB_NL
             g(j,i) = 0.0
@@ -161,6 +166,7 @@
             end do
           end do
         end do
+!$OMP END PARALLEL DO
 !$pragma endscop
 
         end subroutine

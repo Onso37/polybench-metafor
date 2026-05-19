@@ -97,6 +97,7 @@
         integer :: i, j, j1, j2
 !$pragma scop
 !       Determine mean of column vectors of input data matrix
+!$OMP PARALLEL DO PRIVATE(i) SCHEDULE(STATIC)
         do j = 1, _PB_M
           mean(j) = 0.0D0
           do i = 1, _PB_N
@@ -104,15 +105,19 @@
           end do
           mean(j) = mean(j) / float_n 
         end do
+!$OMP END PARALLEL DO
 
 !       Center the column vectors.
+!$OMP PARALLEL DO PRIVATE(j) SCHEDULE(STATIC)
         do i = 1, _PB_N
           do j = 1, _PB_M
             dat(j, i) = dat(j, i) - mean(j)
           end do
         end do
+!$OMP END PARALLEL DO
 
 !       Calculate the m * m covariance matrix.
+!$OMP PARALLEL DO PRIVATE(j2, i) SCHEDULE(STATIC)
         do j1 = 1, _PB_M
           do j2 = j1, _PB_M
             symmat(j2, j1) = 0.0D0
@@ -122,6 +127,7 @@
             symmat(j1, j2) = symmat(j2, j1)
           end do
         end do
+!$OMP END PARALLEL DO
 !$pragma endscop
         end subroutine
 

@@ -110,19 +110,23 @@
         integer :: i, j, k
 
 !$pragma scop
+!$OMP PARALLEL DO PRIVATE(j) SCHEDULE(STATIC)
         do i = 1, _PB_NI
           do j = 1, _PB_NI
             c(j, i) = c(j, i) * beta
           end do
         end do
+!$OMP END PARALLEL DO
+!$OMP PARALLEL DO PRIVATE(j, k) SCHEDULE(STATIC)
         do i = 1, _PB_NI
           do j = 1, _PB_NI
-            do k = 1, _PB_NI
+            do k = 1, _PB_NJ
               c(j, i) = c(j, i) + (alpha * a(k, i) * b(k, j))
               c(j, i) = c(j, i) + (alpha * b(k, i) * a(k, j))
             end do
           end do
         end do
+!$OMP END PARALLEL DO
 !$pragma endscop
         end subroutine
 

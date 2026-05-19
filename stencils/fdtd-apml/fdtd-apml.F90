@@ -192,8 +192,9 @@
         integer :: ix, iy, iz
 
 !$pragma scop
+!$OMP PARALLEL DO PRIVATE(iy, ix) SCHEDULE(STATIC)
         do iz = 1, _PB_CZ
-          do iy = 1, _PB_CYM 
+          do iy = 1, _PB_CYM
             do ix = 1, _PB_CXM 
               clf(iy, iz) = ex(ix, iy, iz) - ex(ix, iy + 1, iz) + &
                             ey(ix + 1, iy, iz) - ey(ix, iy, iz)
@@ -221,6 +222,7 @@
                                         cxph(_PB_CXM + 1)) * &
                                         bza(_PB_CXM + 1, iy, iz))
             bza(_PB_CXM + 1, iy, iz) = tmp(iy, iz)
+          end do
 
           do ix = 1, _PB_CXM 
             clf(iy, iz) = ex(ix, _PB_CYM + 1, iz) - ax(ix, iz) + &
@@ -250,8 +252,8 @@
              ((mui * czm(iz) / cxph(_PB_CXM + 1)) * &
               bza(_PB_CXM + 1, _PB_CYM + 1, iz))
           bza(_PB_CXM + 1, _PB_CYM + 1, iz) = tmp(iy, iz)
-          end do
         end do
+!$OMP END PARALLEL DO
 
 !$pragma endscop
         end subroutine

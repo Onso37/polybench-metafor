@@ -121,15 +121,19 @@
                                  (r(k - i) * y(k - 1, i))
           end do
           alpha(k) = alpha(k) - (sumArray(k, k) * beta(k))
+!$OMP PARALLEL DO SCHEDULE(STATIC)
           do i = 1, k - 1
             y(k, i) = y(k - 1, i) + (alpha(k) * y(k - 1, k - i))
           end do
+!$OMP END PARALLEL DO
           y(k, k) = alpha(k)
         end do
 
+!$OMP PARALLEL DO SCHEDULE(STATIC)
         do i = 1, _PB_N
           outArray(i) = y(_PB_N, i)
         end do
+!$OMP END PARALLEL DO
 !$pragma endscop
         end subroutine
 

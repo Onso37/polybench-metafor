@@ -1,3 +1,4 @@
+              b(j, i) = b(j, i) + (alpha * a(k, i) * b(k, j))
 !******************************************************************************
 !
 !  trmm.F90: This file is part of the PolyBench/Fortran 1.0 test suite.
@@ -91,16 +92,17 @@
         DATA_TYPE, dimension(ni, ni) :: a
         DATA_TYPE, dimension(ni, ni) :: b
         DATA_TYPE :: alpha
-        integer :: ni
         integer :: i, j, k
 
 !$pragma scop
-        do i = 2, _PB_NI 
-          do j = 1, _PB_NI 
+        do i = 2, _PB_NI
+!$OMP PARALLEL DO PRIVATE(k) SCHEDULE(STATIC)
+          do j = 1, _PB_NI
             do k = 1, i - 1
               b(j, i) = b(j, i) + (alpha * a(k, i) * b(k, j))
             end do
           end do
+!$OMP END PARALLEL DO
         end do
 !$pragma endscop
         end subroutine

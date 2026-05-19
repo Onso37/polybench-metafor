@@ -109,6 +109,7 @@
         integer :: i, j
 
 !$pragma scop
+!$OMP PARALLEL DO PRIVATE(j) SCHEDULE(STATIC)
         do i = 1, _PB_N
           tmp(i) = 0.0D0
           y(i) = 0.0D0
@@ -118,6 +119,7 @@
           end do
           y(i) = (alpha * tmp(i)) + (beta * y(i))
         end do
+!$OMP END PARALLEL DO
 !$pragma endscop
         end subroutine
 

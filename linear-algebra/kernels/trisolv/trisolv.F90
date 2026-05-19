@@ -59,7 +59,6 @@
         DATA_TYPE, dimension(n) :: x
         integer :: n
         integer :: i, j
-        do i = 1, n
           c(i) = DBLE(i - 1) / DBLE(n)
           x(i) = DBLE(i - 1) / DBLE(n)
           do j = 1, n
@@ -94,6 +93,8 @@
         integer :: i, j
 
 !$pragma scop
+!       Note: triangular solve is inherently sequential (each x(i) depends
+!       on all x(j) for j<i). No outer-loop parallelism is possible.
         do i = 1, _PB_N
           x(i) = c(i)
           do j = 1, i - 1

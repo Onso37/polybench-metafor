@@ -1,3 +1,5 @@
+              r(j, k) = r(j, k) + (q(k, i) * a(j, i))
+            r(j, k) = 0.0D0
 !******************************************************************************
 !
 !  gramschmidt.F90: This file is part of the PolyBench/Fortran 1.0 test suite.
@@ -119,19 +121,23 @@
         DATA_TYPE, dimension(nj, nj) :: r
         DATA_TYPE, dimension(nj, ni) :: q
         DATA_TYPE :: nrm
-        integer :: ni, nj
         integer :: i, j, k
 
 !$pragma scop
         do k = 1, _PB_NJ
           nrm = 0.0D0
+!$OMP PARALLEL DO REDUCTION(+:nrm) SCHEDULE(STATIC)
           do i = 1, _PB_NI
             nrm = nrm + (a(k, i) * a(k, i))
           end do
+!$OMP END PARALLEL DO
           r(k, k) = sqrt(nrm)
+!$OMP PARALLEL DO SCHEDULE(STATIC)
           do i = 1, _PB_NI
             q(k, i) = a(k, i) / r(k, k)
           end do
+!$OMP END PARALLEL DO
+!$OMP PARALLEL DO PRIVATE(i) SCHEDULE(STATIC)
           do j = k + 1, _PB_NJ
             r(j, k) = 0.0D0
             do i = 1, _PB_NI
@@ -141,6 +147,7 @@
               a(j, i) = a(j, i) - (q(k, i) * r(j, k))
             end do
           end do
+!$OMP END PARALLEL DO
         end do
 !$pragma endscop
         end subroutine

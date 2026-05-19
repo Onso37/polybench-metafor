@@ -107,6 +107,7 @@
         integer :: r, s, p, q
 
 !$pragma scop
+!$OMP PARALLEL DO PRIVATE(q, p, s) SCHEDULE(STATIC)
         do r = 1, _PB_NR
           do q = 1, _PB_NQ
             do p = 1, _PB_NP
@@ -121,6 +122,7 @@
             end do
           end do
         end do
+!$OMP END PARALLEL DO
 !$pragma endscop
         end subroutine
 

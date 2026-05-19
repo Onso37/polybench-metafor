@@ -88,13 +88,17 @@
         integer :: i, t, j
 !$pragma scop
         do t = 1, _PB_TSTEPS
+!$OMP PARALLEL DO PRIVATE(i) SCHEDULE(STATIC)
           do i = 2, _PB_N - 1
             b(i) = 0.33333D0 * (a(i - 1) + a(i) + a(i + 1))
           end do
+!$OMP END PARALLEL DO
 
+!$OMP PARALLEL DO PRIVATE(j) SCHEDULE(STATIC)
           do j = 2, _PB_N -1
             a(j) = b(j)
           end do
+!$OMP END PARALLEL DO
         end do
 !$pragma endscop
         end subroutine

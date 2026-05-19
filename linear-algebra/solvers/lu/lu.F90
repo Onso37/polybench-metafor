@@ -86,14 +86,18 @@
 
 !$pragma scop
         do k = 1, _PB_N
+!$OMP PARALLEL DO SCHEDULE(STATIC)
           do j = k + 1, _PB_N
             a(j, k) = a(j, k) / a(k, k)
           end do
+!$OMP END PARALLEL DO
+!$OMP PARALLEL DO PRIVATE(j) SCHEDULE(STATIC)
           do i = k + 1, _PB_N
             do j = k + 1, _PB_N
               a(j, i) = a(j, i) - (a(k, i) * a(j, k))
             end do
           end do
+!$OMP END PARALLEL DO
         end do
 !$pragma endscop
         end subroutine

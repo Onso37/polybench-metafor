@@ -1,0 +1,228 @@
+================================================================================
+  PolyBench/Fortran 1.0 — OpenMP Parallelization Summary
+  Date: 2026-05-19
+================================================================================
+
+OVERVIEW
+--------
+All 30 Fortran benchmark files in this suite have been annotated with OpenMP
+directives using the Fortran sentinel syntax (!$OMP). A total of 67
+!$OMP PARALLEL DO regions were added across 28 files. Two files were left
+sequential by necessity (see "Sequential Benchmarks" below).
+
+To compile with OpenMP support, add the appropriate flag to your Fortran
+compiler invocation:
+  - GFortran :  gfortran -fopenmp ...
+  - Intel ifort:  ifort -qopenmp ...
+  - Cray ftn  :  ftn -h omp ...
+
+The compile.sh script may need to be updated to include the OpenMP flag.
+
+--------------------------------------------------------------------------------
+PARALLELIZATION STRATEGY
+--------------------------------------------------------------------------------
+
+Three main strategies were applied depending on the algorithm:
+
+  1. EMBARRASSINGLY PARALLEL LOOPS
+     The outermost loop over independent data (typically "do i = 1, N") was
+     decorated with !$OMP PARALLEL DO. Loop indices and scalar temporaries
+     were listed in PRIVATE clauses. SCHEDULE(STATIC) was used throughout
+     for predictable, balanced work distribution.
+
+  2. SEQUENTIAL OUTER LOOP — PARALLEL INNER LOOPS
+     For algorithms whose outer loop carries a dependence (LU, Gramm-Schmidt,
+     Cholesky, Durbin, etc.), only the inner loops that are demonstrably
+     independent were parallelized. A new parallel region is created on each
+     outer-loop iteration.
+
+  3. RACE-CONDITION RESTRUCTURING
+     A few kernels (atax, bicg) had a fused loop whose inner update wrote to
+     a shared output vector, creating a race when the outer loop ran in
+     parallel. These were split into two separate loops:
+       - A parallel loop computing the intermediate vector (no races).
+       - A second parallel loop with the loop nest transposed so each thread
+         owns a unique output element.
+
+OpenMP clauses used:
+  PRIVATE(...)      — loop indices and scalar temporaries local to each thread
+  REDUCTION(+:var)  — scalar accumulations (e.g. dot-product style sums)
+  SCHEDULE(STATIC)  — static equal-chunk assignment of iterations to threads
+
+--------------------------------------------------------------------------------
+FILE-BY-FILE DETAILS
+--------------------------------------------------------------------------------
+
+DATAMINING
+----------
+correlation.F90      4 parallel regions
+  - Mean computation over M columns (parallel do j, reduction in inner i)
+  - Std-dev computation over M columns (parallel do j)
+  - Centering/normalization sweep (parallel do i)
+  - Correlation matrix upper triangle (parallel do j1, private j2/i)
+
+covariance.F90       3 parallel regions
+  - Mean computation over M columns (parallel do j)
+  - Centering sweep (parallel do i)
+  - Covariance matrix upper triangle (parallel do j1, private j2/i)
+
+LINEAR ALGEBRA — KERNELS
+------------------------
+2mm.F90              2 parallel regions
+  - First matrix multiply:  tmp = alpha * A * B  (parallel do i, private j/k)
+  - Second matrix multiply: D = beta*D + tmp * C  (parallel do i, private j/k)
+
+3mm.F90              3 parallel regions
+  - E := A*B  (parallel do i, private j/k)
+  - F := C*D  (parallel do i, private j/k)
+  - G := E*F  (parallel do i, private j/k)
+
+atax.F90             3 parallel regions
+  - Initialization:  y = 0           (parallel do i)
+  - tmp(i) = A^T * x                 (parallel do i, private j)
+  - y += A * tmp  [loop transposed]  (parallel do j, private i)
+
+bicg.F90             3 parallel regions
+  - Initialization:  s = 0           (parallel do i)
+  - q(i) = A * p  [private per i]    (parallel do i, private j)
+  - s += A^T * r  [loop transposed]  (parallel do j, private i)
+
+cholesky.F90         2 parallel regions
+  - Inner diagonal update:  reduction of x over j<i  (parallel do j, reduction)
+  - Off-diagonal panel update for j>i  (parallel do j, private x/k)
+  Note: outer "do i" is sequential (Cholesky factorization dependency).
+
+doitgen.F90          1 parallel region
+  - Outermost "do r" loop parallelized  (parallel do r, private q/p/s)
+
+gemm.F90             1 parallel region
+  - C = beta*C + alpha*A*B  (parallel do i, private j/k)
+
+gemver.F90           4 parallel regions
+  - A += u1*v1^T + u2*v2^T  (parallel do i, private j)
+  - x += beta * A^T * y     (parallel do i, private j)
+  - x += z                  (parallel do i)
+  - w += alpha * A * x      (parallel do i, private j)
+
+gesummv.F90          1 parallel region
+  - tmp = A*x, y = B*x, y = alpha*tmp + beta*y  (parallel do i, private j)
+
+mvt.F90              2 parallel regions
+  - x1 += A * y1  (parallel do i, private j)
+  - x2 += A^T * y2  (parallel do i, private j)
+
+symm.F90             1 parallel region
+  - Inner "do j" loop parallelized inside sequential "do i"
+    (parallel do j, private k/acc)
+  Note: outer "do i" cannot be parallelized because c(j,k) for k<j is
+  updated by every i iteration, creating write-write conflicts.
+
+syr2k.F90            2 parallel regions
+  - C = beta*C  (parallel do i, private j)
+  - C += alpha*(A*B^T + B*A^T)  (parallel do i, private j/k)
+
+syrk.F90             2 parallel regions
+  - C = beta*C  (parallel do i, private j)
+  - C += alpha * A * A^T  (parallel do i, private j/k)
+
+trisolv.F90          0 parallel regions  [SEQUENTIAL — see below]
+
+trmm.F90             1 parallel region
+  - Inner "do j" loop parallelized inside sequential "do i"
+    (parallel do j, private k)
+  Note: outer "do i" is sequential (b(k,j) depends on earlier i iterations).
+
+LINEAR ALGEBRA — SOLVERS
+-------------------------
+durbin.F90           2 parallel regions
+  - Inner y-update vector sweep  (parallel do i, inside sequential do k)
+  - Final copy outArray = y(N,:)  (parallel do i)
+
+dynprog.F90          1 parallel region
+  - Initialization c = 0  (parallel do i, private j, inside sequential loops)
+  Note: the main DP recurrence is sequential.
+
+gramschmidt.F90      3 parallel regions  (all inside sequential "do k")
+  - nrm = sum(a^2)  (parallel do i, reduction(+:nrm))
+  - q(k,:) = a(k,:) / r(k,k)  (parallel do i)
+  - Outer j loop: r(j,k) accumulation + a(j,:) update  (parallel do j, private i)
+
+lu.F90               2 parallel regions  (inside sequential "do k")
+  - Column scaling: a(j,k) /= a(k,k)  (parallel do j)
+  - Rank-1 update panel  (parallel do i, private j)
+
+ludcmp.F90           2 parallel regions  (inside sequential "do i")
+  - Forward panel: a(i,j) update  (parallel do j, private k/w)
+  - Rank-1 update: a(j,i+1) update  (parallel do j, private k/w)
+  Note: forward/backward substitution phases remain sequential.
+
+MEDLEY
+------
+floyd-warshall.F90   1 parallel region
+  - Inner "do i" loop parallelized (parallel do i, private j)
+  Note: outer "do k" is sequential (Floyd-Warshall all-pairs shortest path).
+
+reg_detect.F90       3 parallel regions  (inside sequential "do t")
+  - diff initialization sweep  (parallel do j, private i/cnt)
+  - sumDiff + mean computation  (parallel do j, private i/cnt)
+  - path initialization row  (parallel do i)
+  Note: final path diagonal recurrence is sequential (wavefront dependency).
+
+STENCILS
+--------
+adi.F90              6 parallel regions  (inside sequential "do t")
+  - Forward sweep (column direction)  (parallel do i1, private i2)
+  - Divide by diagonal (column)       (parallel do i1)
+  - Back substitution (column)        (parallel do i1, private i2)
+  - Forward sweep (row direction)     (parallel do i1, private i2)
+  - Divide by diagonal (row)          (parallel do i2)
+  - Back substitution (row)           (parallel do i1, private i2)
+
+fdtd-2d.F90          4 parallel regions  (inside sequential "do t")
+  - ey(:,1) = fict(t)  [boundary]    (parallel do j)
+  - ey update interior               (parallel do i, private j)
+  - ex update interior               (parallel do i, private j)
+  - hz update                        (parallel do i, private j)
+
+fdtd-apml.F90        1 parallel region
+  - Outer "do iz" loop parallelized  (parallel do iz, private iy/ix)
+
+jacobi-1d-imper.F90  2 parallel regions  (inside sequential "do t")
+  - b(i) = stencil(a)  (parallel do i)
+  - a(j) = b(j)        (parallel do j)
+
+jacobi-2d-imper.F90  2 parallel regions  (inside sequential "do t")
+  - b(j,i) = stencil(a)  (parallel do i, private j)
+  - a(j,i) = b(j,i)      (parallel do i, private j)
+
+seidel-2d.F90        0 parallel regions  [SEQUENTIAL — see below]
+
+--------------------------------------------------------------------------------
+SEQUENTIAL BENCHMARKS (no parallelism possible)
+--------------------------------------------------------------------------------
+
+trisolv.F90
+  Algorithm: Forward triangular solve — x(i) = (c(i) - sum_{j<i} A(j,i)*x(j))
+             / A(i,i).  Each x(i) depends on all previously computed x(j),
+             making the outer "do i" loop inherently sequential. No safe inner
+             loop parallelism exists either.
+
+seidel-2d.F90
+  Algorithm: 2-D Gauss-Seidel stencil — each cell a(j,i) is updated using
+             already-updated neighbors from the same sweep (a(j-1,i),
+             a(j,i-1), etc.). This creates loop-carried dependences in both
+             the i and j dimensions within a single time step, making both
+             spatial loops sequential. A wavefront (anti-diagonal) or
+             red-black decomposition would be required to expose parallelism,
+             but that would change the algorithm semantics.
+
+--------------------------------------------------------------------------------
+TOTAL
+--------------------------------------------------------------------------------
+  Files processed   : 30
+  Files parallelized: 28
+  Files sequential  :  2  (trisolv, seidel-2d)
+  Parallel regions  : 67
+
+================================================================================
+

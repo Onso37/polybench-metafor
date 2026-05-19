@@ -93,10 +93,13 @@
 !$pragma scop
         do i = 1, _PB_N
           x = a(i, i)
+!$OMP PARALLEL DO REDUCTION(-:x) SCHEDULE(STATIC)
           do j = 1, i - 1
             x = x - a(j, i) * a(j, i)
           end do
+!$OMP END PARALLEL DO
           p(i) = 1.0D0 / sqrt(x)
+!$OMP PARALLEL DO PRIVATE(x, k) SCHEDULE(STATIC)
           do j = i + 1, _PB_N
             x = a(j, i)
             do k = 1, i - 1
@@ -104,6 +107,7 @@
             end do
             a(i, j) = x * p(i)
           end do
+!$OMP END PARALLEL DO
         end do
 !$pragma endscop
         end subroutine

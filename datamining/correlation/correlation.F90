@@ -105,6 +105,7 @@
         EPS = 0.1D0
 !$pragma scop
 !       Determine mean of column vectors of input data matrix
+!$OMP PARALLEL DO PRIVATE(i) SCHEDULE(STATIC)
         do j = 1, _PB_M
           mean(j) = 0.0D0
           do i = 1, _PB_N
@@ -112,8 +113,10 @@
           end do
           mean(j) = mean(j) / float_n
         end do
+!$OMP END PARALLEL DO
 
 !       Determine standard deviations of column vectors of data matrix.
+!$OMP PARALLEL DO PRIVATE(i) SCHEDULE(STATIC)
         do j = 1, _PB_M
           stddev(j) = 0.0D0
           do i = 1, _PB_N
@@ -126,17 +129,21 @@
             stddev(j) = 1.0D0
           endif
         end do
+!$OMP END PARALLEL DO
 
 !       Center and reduce the column vectors.
+!$OMP PARALLEL DO PRIVATE(j) SCHEDULE(STATIC)
         do i = 1, _PB_N
           do j = 1, _PB_M
             dat(j, i) = dat(j, i) - mean(j)
             dat(j, i) = dat(j, i) / (sqrt(float_n) * stddev(j))
           end do
         end do
+!$OMP END PARALLEL DO
 
 !       Calculate the m * m correlation matrix.
-        do j1 = 1, _PB_M - 1 
+!$OMP PARALLEL DO PRIVATE(j2, i) SCHEDULE(STATIC)
+        do j1 = 1, _PB_M - 1
           symmat(j1, j1) = 1.0D0
           do j2 = j1 + 1, _PB_M 
             symmat(j2, j1) = 0.0D0
@@ -146,6 +153,7 @@
             symmat(j1, j2) = symmat(j2, j1)
           end do
         end do
+!$OMP END PARALLEL DO
         symmat(_PB_M, _PB_M) = 1.0D0
 !$pragma endscop
         end subroutine

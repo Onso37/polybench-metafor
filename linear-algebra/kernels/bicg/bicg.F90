@@ -118,17 +118,28 @@
         integer :: i,j
 
 !$pragma scop
+!$OMP PARALLEL DO SCHEDULE(STATIC)
         do i = 1, _PB_NY
           s(i) = 0.0D0
         end do
+!$OMP END PARALLEL DO
 
+!$OMP PARALLEL DO PRIVATE(j) SCHEDULE(STATIC)
         do i = 1, _PB_NX
           q(i) = 0.0D0
           do j = 1, _PB_NY
-            s(j) = s(j) + (r(i) * a(j, i))
             q(i) = q(i) + (a(j, i) * p(j))
           end do
         end do
+!$OMP END PARALLEL DO
+
+!$OMP PARALLEL DO PRIVATE(i) SCHEDULE(STATIC)
+        do j = 1, _PB_NY
+          do i = 1, _PB_NX
+            s(j) = s(j) + (r(i) * a(j, i))
+          end do
+        end do
+!$OMP END PARALLEL DO
 !$pragma endscop
         end subroutine
 

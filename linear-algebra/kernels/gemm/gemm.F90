@@ -114,6 +114,7 @@
         integer :: i, j, k
 
 !$pragma scop
+!$omp parallel do collapse(2) private(j, k)
         do i = 1, _PB_NI
           do j = 1, _PB_NJ
             c(j, i) = c(j, i) * beta
@@ -122,6 +123,7 @@
             end do
           end do
         end do
+!$omp end parallel do
 !$pragma endscop
         end subroutine
 

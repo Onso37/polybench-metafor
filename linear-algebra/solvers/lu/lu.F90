@@ -86,14 +86,18 @@
 
 !$pragma scop
         do k = 1, _PB_N
+!$omp parallel do private(j)
           do j = k + 1, _PB_N
             a(j, k) = a(j, k) / a(k, k)
           end do
+!$omp end parallel do
+!$omp parallel do collapse(2) private(i, j)
           do i = k + 1, _PB_N
             do j = k + 1, _PB_N
               a(j, i) = a(j, i) - (a(k, i) * a(j, k))
             end do
           end do
+!$omp end parallel do
         end do
 !$pragma endscop
         end subroutine

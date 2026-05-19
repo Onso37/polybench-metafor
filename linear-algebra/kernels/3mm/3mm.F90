@@ -133,6 +133,7 @@
 
 !$pragma scop
         ! E := A*B
+!$omp parallel do collapse(2) private(j, k)
         do i = 1, _PB_NI
           do j = 1, _PB_NJ
             e(j,i) = 0.0
@@ -141,8 +142,10 @@
             end do
           end do
         end do
+!$omp end parallel do
 
         ! F := C*D
+!$omp parallel do collapse(2) private(j, k)
         do i = 1, _PB_NJ
           do j = 1, _PB_NL
             f(j,i) = 0.0
@@ -151,8 +154,10 @@
             end do
           end do
         end do
+!$omp end parallel do
 
         ! G := E*F
+!$omp parallel do collapse(2) private(j, k)
         do i = 1, _PB_NI
           do j = 1, _PB_NL
             g(j,i) = 0.0
@@ -161,6 +166,7 @@
             end do
           end do
         end do
+!$omp end parallel do
 !$pragma endscop
 
         end subroutine

@@ -97,19 +97,24 @@
         integer nx, ny, i, j
 
 !$pragma scop
+!$omp parallel do private(i)
         do i = 1, _PB_NY
           y(i) = 0.0D0
         end do
+!$omp end parallel do
 
-        do i = 1, _PB_NX 
+!$omp parallel do private(j)
+        do i = 1, _PB_NX
           tmp(i) = 0.0D0
           do j = 1, _PB_NY
             tmp(i) = tmp(i) + (a(j, i) * x(j))
           end do
           do j = 1, _PB_NY
+!$omp atomic update
             y(j) = y(j) + a(j, i) * tmp(i)
           end do
         end do
+!$omp end parallel do
 !$pragma endscop
         end subroutine
 

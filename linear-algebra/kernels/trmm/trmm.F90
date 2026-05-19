@@ -91,15 +91,20 @@
         DATA_TYPE, dimension(ni, ni) :: a
         DATA_TYPE, dimension(ni, ni) :: b
         DATA_TYPE :: alpha
+        DATA_TYPE :: update
         integer :: ni
         integer :: i, j, k
 
 !$pragma scop
         do i = 2, _PB_NI 
           do j = 1, _PB_NI 
+            update = 0.0D0
+!$omp parallel do reduction(+:update) private(k)
             do k = 1, i - 1
-              b(j, i) = b(j, i) + (alpha * a(k, i) * b(k, j))
+              update = update + a(k, i) * b(k, j)
             end do
+!$omp end parallel do
+            b(j, i) = b(j, i) + (alpha * update)
           end do
         end do
 !$pragma endscop

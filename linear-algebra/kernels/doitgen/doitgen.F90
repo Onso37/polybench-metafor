@@ -107,6 +107,7 @@
         integer :: r, s, p, q
 
 !$pragma scop
+!$omp parallel do collapse(2) private(q, p, s)
         do r = 1, _PB_NR
           do q = 1, _PB_NQ
             do p = 1, _PB_NP
@@ -121,6 +122,7 @@
             end do
           end do
         end do
+!$omp end parallel do
 !$pragma endscop
         end subroutine
 

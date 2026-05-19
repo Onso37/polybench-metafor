@@ -192,6 +192,7 @@
         integer :: ix, iy, iz
 
 !$pragma scop
+!$omp parallel do collapse(2) private(iz, iy, ix)
         do iz = 1, _PB_CZ
           do iy = 1, _PB_CYM 
             do ix = 1, _PB_CXM 
@@ -252,6 +253,7 @@
           bza(_PB_CXM + 1, _PB_CYM + 1, iz) = tmp(iy, iz)
           end do
         end do
+      !$omp end parallel do
 
 !$pragma endscop
         end subroutine

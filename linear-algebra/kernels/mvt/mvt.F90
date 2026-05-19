@@ -110,16 +110,20 @@
         integer :: i, j
 
 !$pragma scop
+!$omp parallel do private(j)
         do i = 1, _PB_N
           do j = 1, _PB_N
             x1(i) = x1(i) + (a(j, i) * y1(j))
           end do
         end do
+!$omp end parallel do
+!$omp parallel do private(j)
         do i = 1, _PB_N
           do j = 1, _PB_N 
             x2(i) = x2(i) + (a(i, j) * y2(j))
           end do
         end do
+!$omp end parallel do
 !$pragma endscop
         end subroutine
 

@@ -101,6 +101,7 @@
 
 !$pragma scop
         do t = 1, _PB_NITER
+!$omp parallel do private(i, cnt)
           do j = 1, _PB_MAXGRID
             do i = j, _PB_MAXGRID
               do cnt = 1, _PB_LENGTH
@@ -108,7 +109,9 @@
               end do
             end do
           end do
+!$omp end parallel do
 
+!$omp parallel do private(i, cnt)
           do j = 1, _PB_MAXGRID
             do i = j, _PB_MAXGRID
               sumDiff(1, i, j) = diff(1, i, j)
@@ -119,15 +122,20 @@
               mean(i, j) = sumDiff(_PB_LENGTH, i, j)
             end do
           end do
+!$omp end parallel do
 
+!$omp parallel do private(i)
           do i = 1, _PB_MAXGRID
             path(i, 1) = mean(i, 1)
           end do
+!$omp end parallel do
 
           do j = 2, _PB_MAXGRID
+!$omp parallel do private(i)
             do i = j, _PB_MAXGRID
               path(i, j) = path(i - 1, j - 1) + mean(i, j)
             end do
+!$omp end parallel do
           end do
         end do
 !$pragma endscop

@@ -81,18 +81,27 @@
         implicit none
 
         DATA_TYPE, dimension(n,n) :: path
+        DATA_TYPE, dimension(n) :: path_row_k, path_col_k
         integer :: n
         integer :: i, j, k
 
 !$pragma scop
         do k=1, _PB_N
+!$omp parallel do private(i)
+          do i=1, _PB_N
+            path_row_k(i) = path(k, i)
+            path_col_k(i) = path(i, k)
+          end do
+!$omp end parallel do
+!$omp parallel do collapse(2) private(i, j)
           do i=1, _PB_N
             do j=1, _PB_N
-               if( path(j, i) .GE. path(k, i) + path(j, k) ) then
-                 path(j, i) = path(k, i) + path(j, k)
+               if( path(j, i) .GE. path_row_k(i) + path_col_k(j) ) then
+                 path(j, i) = path_row_k(i) + path_col_k(j)
                end if
             end do
           end do
+!$omp end parallel do
         end do
 !$pragma endscop
         end subroutine

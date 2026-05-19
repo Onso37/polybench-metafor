@@ -109,6 +109,7 @@
 
 !$pragma scop
         do i = 1, _PB_NI
+!$omp parallel do private(j, k, acc)
           do j = 1, _PB_NJ
             acc = 0.0D0
               do k = 1, j - 2
@@ -118,6 +119,7 @@
             c(j, i) = (beta * c(j, i)) + (alpha * a(i, i) * b(j, i)) + &
                       (alpha * acc)
           end do
+!$omp end parallel do
         end do
 !$pragma endscop
         end subroutine

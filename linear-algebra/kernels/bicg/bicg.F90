@@ -118,17 +118,22 @@
         integer :: i,j
 
 !$pragma scop
+!$omp parallel do private(i)
         do i = 1, _PB_NY
           s(i) = 0.0D0
         end do
+!$omp end parallel do
 
+!$omp parallel do private(j)
         do i = 1, _PB_NX
           q(i) = 0.0D0
           do j = 1, _PB_NY
+!$omp atomic update
             s(j) = s(j) + (r(i) * a(j, i))
             q(i) = q(i) + (a(j, i) * p(j))
           end do
         end do
+!$omp end parallel do
 !$pragma endscop
         end subroutine
 

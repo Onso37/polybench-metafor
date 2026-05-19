@@ -97,6 +97,7 @@
             x = x - a(j, i) * a(j, i)
           end do
           p(i) = 1.0D0 / sqrt(x)
+!$omp parallel do private(j, k, x)
           do j = i + 1, _PB_N
             x = a(j, i)
             do k = 1, i - 1
@@ -104,6 +105,7 @@
             end do
             a(i, j) = x * p(i)
           end do
+!$omp end parallel do
         end do
 !$pragma endscop
         end subroutine

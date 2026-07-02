@@ -68,6 +68,7 @@
         integer :: n
         integer :: i, j
 
+!$omp parallel do private(j) schedule(static)
         do i = 1, n
           x1(i) = DBLE(i - 1) / DBLE(n)
           x2(i) = (DBLE(i - 1) + 1.0D0) / DBLE(n)
@@ -110,11 +111,13 @@
         integer :: i, j
 
 !$pragma scop
+!$omp parallel do private(j) schedule(static)
         do i = 1, _PB_N
           do j = 1, _PB_N
             x1(i) = x1(i) + (a(j, i) * y1(j))
           end do
         end do
+!$omp parallel do private(j) schedule(static)
         do i = 1, _PB_N
           do j = 1, _PB_N 
             x2(i) = x2(i) + (a(i, j) * y2(j))

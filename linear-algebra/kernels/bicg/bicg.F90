@@ -69,10 +69,12 @@
         integer :: nx, ny
         integer :: i, j
 
+!$omp parallel do schedule(static)
         do i = 1, ny
           p(i) = DBLE(i - 1) * M_PI
         end do
 
+!$omp parallel do private(j) schedule(static)
         do i = 1, nx
           r(i) = DBLE(i - 1) * M_PI
           do j = 1, ny
@@ -118,15 +120,23 @@
         integer :: i,j
 
 !$pragma scop
+!$omp parallel do schedule(static)
         do i = 1, _PB_NY
           s(i) = 0.0D0
         end do
 
+!$omp parallel do private(j) schedule(static)
         do i = 1, _PB_NX
           q(i) = 0.0D0
           do j = 1, _PB_NY
-            s(j) = s(j) + (r(i) * a(j, i))
             q(i) = q(i) + (a(j, i) * p(j))
+          end do
+        end do
+
+!$omp parallel do private(i) schedule(static)
+        do j = 1, _PB_NY
+          do i = 1, _PB_NX
+            s(j) = s(j) + (r(i) * a(j, i))
           end do
         end do
 !$pragma endscop

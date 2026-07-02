@@ -64,6 +64,7 @@
         integer :: i, j
 
         float_n = 1.2D0
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, m 
           do j = 1, n
             dat(j, i) = (DBLE(i - 1) * DBLE(j - 1)) / DBLE(m)
@@ -105,6 +106,7 @@
         EPS = 0.1D0
 !$pragma scop
 !       Determine mean of column vectors of input data matrix
+!$omp parallel do schedule(static)
         do j = 1, _PB_M
           mean(j) = 0.0D0
           do i = 1, _PB_N
@@ -114,6 +116,7 @@
         end do
 
 !       Determine standard deviations of column vectors of data matrix.
+!$omp parallel do schedule(static)
         do j = 1, _PB_M
           stddev(j) = 0.0D0
           do i = 1, _PB_N
@@ -128,6 +131,7 @@
         end do
 
 !       Center and reduce the column vectors.
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, _PB_N
           do j = 1, _PB_M
             dat(j, i) = dat(j, i) - mean(j)
@@ -136,6 +140,7 @@
         end do
 
 !       Calculate the m * m correlation matrix.
+!$omp parallel do private(j2, i) schedule(static)
         do j1 = 1, _PB_M - 1 
           symmat(j1, j1) = 1.0D0
           do j2 = j1 + 1, _PB_M 

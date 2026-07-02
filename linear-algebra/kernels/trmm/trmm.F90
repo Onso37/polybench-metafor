@@ -58,6 +58,7 @@
         integer :: i, j
 
         alpha = 32412D0
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, n
           do j = 1, n
             a(j, i) = (DBLE(i - 1) * DBLE(j - 1)) / DBLE(n)
@@ -96,6 +97,7 @@
 
 !$pragma scop
         do i = 2, _PB_NI 
+!$omp parallel do private(k) schedule(static)
           do j = 1, _PB_NI 
             do k = 1, i - 1
               b(j, i) = b(j, i) + (alpha * a(k, i) * b(k, j))

@@ -75,24 +75,28 @@
         alpha = 32412;
         beta = 2123; 
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, ni
           do j = 1, nk
             a(j,i) = DBLE((i-1) * (j-1)) / ni
           end do
         end do
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, nk
           do j = 1, nj
             b(j,i) = (DBLE((i-1) * (j)))/ nj
           end do
         end do
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, nl
           do j = 1, nj
             c(j,i) = (DBLE(i-1) * (j+2))/ nl
           end do
         end do
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, ni
           do j = 1, nl
             d(j,i) = (DBLE(i-1) * (j+1))/ nk
@@ -135,6 +139,7 @@
         integer :: i, j, k
 
 !$pragma scop
+!$omp parallel do collapse(2) private(k) schedule(static)
         do i = 1, _PB_NI
           do j = 1, _PB_NJ
             tmp(j,i) = 0.0
@@ -144,6 +149,7 @@
           end do
         end do
 
+!$omp parallel do collapse(2) private(k) schedule(static)
         do i = 1, _PB_NI
           do j = 1, _PB_NL
             d(j,i) = d(j,i) * beta

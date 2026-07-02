@@ -59,6 +59,7 @@
         integer :: i, j
         integer length
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, length
           do j = 1, length
             c(j, i) = mod((i-1)*(j-1), 2)
@@ -90,6 +91,7 @@
         output = 0
 
         do iter = 1, _PB_TSTEPS
+!$omp parallel do collapse(2) schedule(static)
           do i = 1, _PB_LENGTH
             do j = 1, _PB_LENGTH
               c(j, i) = 0

@@ -64,12 +64,14 @@
         alpha = 32412D0
         beta = 2123D0
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, ni
           do j = 1, nj
             c(j, i) = ((DBLE((i - 1) * (j - 1)))) / DBLE(ni)
             b(j, i) = ((DBLE((i - 1) * (j - 1)))) / DBLE(ni)
           end do
         end do
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, nj
           do j = 1, nj
             a(j, i) = (DBLE((i - 1) * (j - 1))) / DBLE(ni)
@@ -109,6 +111,7 @@
 
 !$pragma scop
         do i = 1, _PB_NI
+!$omp parallel do private(k, acc) schedule(static)
           do j = 1, _PB_NJ
             acc = 0.0D0
               do k = 1, j - 2

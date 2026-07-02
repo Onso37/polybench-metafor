@@ -55,6 +55,7 @@
         DATA_TYPE, dimension(n) :: p
         integer :: n
         integer :: i, j
+!$omp parallel do private(j) schedule(static)
         do i = 1, n
           p(i) = 1.0D0  / n
           do j = 1, n
@@ -97,6 +98,7 @@
             x = x - a(j, i) * a(j, i)
           end do
           p(i) = 1.0D0 / sqrt(x)
+!$omp parallel do private(k, x) schedule(static)
           do j = i + 1, _PB_N
             x = a(j, i)
             do k = 1, i - 1

@@ -70,6 +70,7 @@
         integer :: i, j
         integer :: n
 
+!$omp parallel do private(j) schedule(static)
         do i = 1, n
           alpha(i) = i
           beta(i) = (i/n)/DBLE(2.0)
@@ -127,6 +128,7 @@
           y(k, k) = alpha(k)
         end do
 
+!$omp parallel do schedule(static)
         do i = 1, _PB_N
           outArray(i) = y(_PB_N, i)
         end do

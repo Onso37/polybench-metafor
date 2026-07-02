@@ -63,6 +63,7 @@
         integer :: maxgrid 
         DATA_TYPE, dimension (maxgrid, maxgrid) :: sumTang, mean, path
         integer :: i, j
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, maxgrid
          do j = 1, maxgrid 
             sumTang(j, i) = i * j
@@ -101,6 +102,7 @@
 
 !$pragma scop
         do t = 1, _PB_NITER
+!$omp parallel do private(i, cnt) schedule(static)
           do j = 1, _PB_MAXGRID
             do i = j, _PB_MAXGRID
               do cnt = 1, _PB_LENGTH
@@ -109,6 +111,7 @@
             end do
           end do
 
+!$omp parallel do private(i, cnt) schedule(static)
           do j = 1, _PB_MAXGRID
             do i = j, _PB_MAXGRID
               sumDiff(1, i, j) = diff(1, i, j)
@@ -120,11 +123,13 @@
             end do
           end do
 
+!$omp parallel do schedule(static)
           do i = 1, _PB_MAXGRID
             path(i, 1) = mean(i, 1)
           end do
 
           do j = 2, _PB_MAXGRID
+!$omp parallel do schedule(static)
             do i = j, _PB_MAXGRID
               path(i, j) = path(i - 1, j - 1) + mean(i, j)
             end do

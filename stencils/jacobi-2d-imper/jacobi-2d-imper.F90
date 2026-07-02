@@ -55,6 +55,7 @@
         integer :: n
         integer :: i, j
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, n
           do j = 1, n
             a(j, i) = (DBLE(i - 1) * DBLE(j + 1) + 2.0D0) / n
@@ -93,12 +94,14 @@
 
 !$pragma scop
         do t = 1, _PB_TSTEPS
+!$omp parallel do collapse(2) schedule(static)
           do i = 2, _PB_N - 1
             do j = 2, _PB_N - 1
               b(j, i) = 0.2D0 * (a(j, i) + a(j - 1, i) + a(1 + j, i) + &
                                  a(j, 1 + i) + a(j, i - 1))
             end do
           end do
+!$omp parallel do collapse(2) schedule(static)
           do i = 2, _PB_N - 1
             do j = 2, _PB_N - 1
               a(j, i) = b(j, i)

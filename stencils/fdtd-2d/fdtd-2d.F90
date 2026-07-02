@@ -63,9 +63,11 @@
         DATA_TYPE, dimension(ny, nx) :: ey
         DATA_TYPE, dimension(ny, nx) :: hz
         integer :: i, j
+!$omp parallel do schedule(static)
         do i = 1, tmax
           fict(i) = DBLE(i - 1)
         end do
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, nx
           do j = 1, ny
             ex(j, i) = (DBLE((i - 1) * (j))) / DBLE(nx)
@@ -110,19 +112,23 @@
 
 !$pragma scop
         do t = 1, _PB_TMAX
+!$omp parallel do schedule(static)
           do j = 1, _PB_NY
             ey(j, 1) = fict(t)
           end do
+!$omp parallel do collapse(2) schedule(static)
           do i = 2, _PB_NX
             do j = 1, _PB_NY
               ey(j, i) = ey(j, i) - (0.5D0 * (hz(j, i) - hz(j, i - 1)))
             end do
           end do
+!$omp parallel do collapse(2) schedule(static)
           do i = 1, _PB_NX
             do j = 2, _PB_NY
               ex(j, i) = ex(j, i) - (0.5D0 * (hz(j, i) - hz(j - 1, i)))
             end do
           end do
+!$omp parallel do collapse(2) schedule(static)
           do i = 1, _PB_NX - 1
             do j = 1, _PB_NY - 1
               hz(j, i) = hz(j, i) - (0.7D0 * (ex(j + 1, i) - ex(j, i)  &

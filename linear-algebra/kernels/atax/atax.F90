@@ -62,6 +62,7 @@
         DATA_TYPE, dimension(ny) :: x
         integer :: nx, ny
         integer :: i, j
+!$omp parallel do private(j) schedule(static)
         do i = 1, ny
           x(i) = DBLE(i - 1) * M_PI
           do j = 1, ny
@@ -97,16 +98,22 @@
         integer nx, ny, i, j
 
 !$pragma scop
+!$omp parallel do schedule(static)
         do i = 1, _PB_NY
           y(i) = 0.0D0
         end do
 
+!$omp parallel do private(j) schedule(static)
         do i = 1, _PB_NX 
           tmp(i) = 0.0D0
           do j = 1, _PB_NY
             tmp(i) = tmp(i) + (a(j, i) * x(j))
           end do
-          do j = 1, _PB_NY
+        end do
+
+!$omp parallel do private(i) schedule(static)
+        do j = 1, _PB_NY
+          do i = 1, _PB_NX
             y(j) = y(j) + a(j, i) * tmp(i)
           end do
         end do

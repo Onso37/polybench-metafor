@@ -72,6 +72,7 @@
         alpha = 43532.0D0
         beta = 12313.0D0
 
+!$omp parallel do private(j) schedule(static)
         do i = 1, n
           x(i) = DBLE(i - 1) / DBLE(n)
           do j = 1, n
@@ -109,6 +110,7 @@
         integer :: i, j
 
 !$pragma scop
+!$omp parallel do private(j) schedule(static)
         do i = 1, _PB_N
           tmp(i) = 0.0D0
           y(i) = 0.0D0

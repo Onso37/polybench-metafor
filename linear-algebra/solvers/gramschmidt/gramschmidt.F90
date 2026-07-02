@@ -59,6 +59,7 @@
         integer :: ni, nj
         integer :: i, j
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, ni 
           do j = 1, nj
             a(j, i) = (DBLE(i - 1) * DBLE(j - 1)) / DBLE(ni)
@@ -66,6 +67,7 @@
           end do
         end do
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, ni 
           do j = 1, nj
             r(j, i) = (DBLE(i - 1) * DBLE(j + 1)) / DBLE(nj)
@@ -125,18 +127,24 @@
 !$pragma scop
         do k = 1, _PB_NJ
           nrm = 0.0D0
+!$omp parallel do reduction(+:nrm) schedule(static)
           do i = 1, _PB_NI
             nrm = nrm + (a(k, i) * a(k, i))
           end do
           r(k, k) = sqrt(nrm)
+!$omp parallel do schedule(static)
           do i = 1, _PB_NI
             q(k, i) = a(k, i) / r(k, k)
           end do
+!$omp parallel do private(i) schedule(static)
           do j = k + 1, _PB_NJ
             r(j, k) = 0.0D0
             do i = 1, _PB_NI
               r(j, k) = r(j, k) + (q(k, i) * a(j, i))
             end do
+          end do
+!$omp parallel do collapse(2) schedule(static)
+          do j = k + 1, _PB_NJ
             do i = 1, _PB_NI
               a(j, i) = a(j, i) - (q(k, i) * r(j, k))
             end do

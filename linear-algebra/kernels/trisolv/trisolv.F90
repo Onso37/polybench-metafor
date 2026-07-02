@@ -59,6 +59,7 @@
         DATA_TYPE, dimension(n) :: x
         integer :: n
         integer :: i, j
+!$omp parallel do private(j) schedule(static)
         do i = 1, n
           c(i) = DBLE(i - 1) / DBLE(n)
           x(i) = DBLE(i - 1) / DBLE(n)

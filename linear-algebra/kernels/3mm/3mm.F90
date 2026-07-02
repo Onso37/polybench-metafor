@@ -74,24 +74,28 @@
         integer :: ni, nj, nk, nl, nm
         integer :: i, j
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, ni
           do j = 1, nk
             a(j,i) = DBLE(i-1) * DBLE(j-1) / ni
           end do
         end do
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, nk
           do j = 1, nj
             b(j,i) = (DBLE(i-1) * DBLE(j))/ nj
           end do
         end do
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, nj
           do j = 1, nm
             c(j,i) = (DBLE(i-1) * DBLE(j+2))/ nl
           end do
         end do
 
+!$omp parallel do collapse(2) schedule(static)
         do i = 1, nm
           do j = 1, nl
             d(j,i) = (DBLE(i-1) * DBLE(j+1))/ nk
@@ -133,6 +137,7 @@
 
 !$pragma scop
         ! E := A*B
+!$omp parallel do collapse(2) private(k) schedule(static)
         do i = 1, _PB_NI
           do j = 1, _PB_NJ
             e(j,i) = 0.0
@@ -143,6 +148,7 @@
         end do
 
         ! F := C*D
+!$omp parallel do collapse(2) private(k) schedule(static)
         do i = 1, _PB_NJ
           do j = 1, _PB_NL
             f(j,i) = 0.0
@@ -153,6 +159,7 @@
         end do
 
         ! G := E*F
+!$omp parallel do collapse(2) private(k) schedule(static)
         do i = 1, _PB_NI
           do j = 1, _PB_NL
             g(j,i) = 0.0

@@ -63,9 +63,12 @@
         DATA_TYPE, dimension(ny, nx) :: ey
         DATA_TYPE, dimension(ny, nx) :: hz
         integer :: i, j
+        !$omp parallel do
         do i = 1, tmax
           fict(i) = DBLE(i - 1)
         end do
+        !$omp end parallel do
+        !$omp parallel do collapse(2)
         do i = 1, nx
           do j = 1, ny
             ex(j, i) = (DBLE((i - 1) * (j))) / DBLE(nx)
@@ -73,6 +76,7 @@
             hz(j, i) = (DBLE((i - 1) * (j + 2))) / DBLE(nx)
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 
@@ -110,25 +114,33 @@
 
 !$pragma scop
         do t = 1, _PB_TMAX
+          !$omp parallel do
           do j = 1, _PB_NY
             ey(j, 1) = fict(t)
           end do
+          !$omp end parallel do
           do i = 2, _PB_NX
+            !$omp parallel do
             do j = 1, _PB_NY
               ey(j, i) = ey(j, i) - (0.5D0 * (hz(j, i) - hz(j, i - 1)))
             end do
+            !$omp end parallel do
           end do
+          !$omp parallel do collapse(2)
           do i = 1, _PB_NX
             do j = 2, _PB_NY
               ex(j, i) = ex(j, i) - (0.5D0 * (hz(j, i) - hz(j - 1, i)))
             end do
           end do
+          !$omp end parallel do
+          !$omp parallel do collapse(2)
           do i = 1, _PB_NX - 1
             do j = 1, _PB_NY - 1
               hz(j, i) = hz(j, i) - (0.7D0 * (ex(j + 1, i) - ex(j, i)  &
                                            + ey(j, i + 1) - ey(j, i)))
             end do
           end do
+          !$omp end parallel do
         end do
 !$pragma endscop
         end subroutine

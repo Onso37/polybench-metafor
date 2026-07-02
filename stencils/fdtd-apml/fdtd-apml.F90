@@ -111,18 +111,25 @@
 
         mui = 2341
         ch = 42
+        !$omp parallel do
         do i = 1, cz + 1
           czm(i) = (DBLE(i - 1) + 1.0D0) / DBLE(cxm)
           czp(i) = (DBLE(i - 1) + 2.0D0) / DBLE(cxm)
         end do
+        !$omp end parallel do
+        !$omp parallel do
         do i = 1, cxm + 1
           cxmh(i) = (DBLE(i - 1) + 3.0D0) / DBLE(cxm)
           cxph(i) = (DBLE(i - 1) + 4.0D0) / DBLE(cxm)
         end do
+        !$omp end parallel do
+        !$omp parallel do
         do i = 1, cym + 1
           cymh(i) = (DBLE(i - 1) + 5.0D0) / DBLE(cxm)
           cyph(i) = (DBLE(i - 1) + 6.0D0) / DBLE(cxm)
         end do
+        !$omp end parallel do
+        !$omp parallel do collapse(2)
         do i = 1, cz + 1
           do j = 1, cym + 1
             ry(j, i) = ((DBLE(i - 1) * DBLE(j)) + 10.0D0) / &
@@ -139,6 +146,7 @@
             end do
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 

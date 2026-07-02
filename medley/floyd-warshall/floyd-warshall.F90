@@ -50,11 +50,13 @@
         DATA_TYPE, dimension(n,n) :: path
         integer :: i, j, n 
 
+        !$omp parallel do collapse(2)
         do i=1, n
           do j=1, n
             path(j, i) = (DBLE(i * j))/ DBLE(n)
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 
@@ -86,6 +88,7 @@
 
 !$pragma scop
         do k=1, _PB_N
+          !$omp parallel do collapse(2)
           do i=1, _PB_N
             do j=1, _PB_N
                if( path(j, i) .GE. path(k, i) + path(j, k) ) then
@@ -93,6 +96,7 @@
                end if
             end do
           end do
+          !$omp end parallel do
         end do
 !$pragma endscop
         end subroutine

@@ -50,11 +50,13 @@
         DATA_TYPE, dimension(n, n) :: a
         integer :: n
         integer :: i,j
+        !$omp parallel do collapse(2)
         do i = 1, n
           do j = 1, n
             a(j, i) = ((DBLE(i - 1) * DBLE(j + 1)) + 2.0D0) / n
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 

@@ -59,12 +59,14 @@
         integer :: i, j
         integer length
 
+        !$omp parallel do collapse(2)
         do i = 1, length
           do j = 1, length
             c(j, i) = mod((i-1)*(j-1), 2)
             w(j, i) = (DBLE((i - 1) - (j - 1))) / DBLE(length)
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 
@@ -90,11 +92,13 @@
         output = 0
 
         do iter = 1, _PB_TSTEPS
+          !$omp parallel do collapse(2)
           do i = 1, _PB_LENGTH
             do j = 1, _PB_LENGTH
               c(j, i) = 0
             end do
           end do
+          !$omp end parallel do
 
           do i = 1, _PB_LENGTH - 1
             do j = i + 1, _PB_LENGTH 

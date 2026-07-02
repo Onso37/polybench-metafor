@@ -67,21 +67,27 @@
         alpha = 32412
         beta = 2123
 
+        !$omp parallel do collapse(2)
         do i = 1, ni
           do j = 1, nj
             c(j, i) = ((DBLE(i - 1) * DBLE(j - 1))) / DBLE(ni)
           end do
         end do
+        !$omp end parallel do
+        !$omp parallel do collapse(2)
         do i = 1, ni
           do j = 1, nk
             a(j, i) = ((DBLE(i - 1) * DBLE(j - 1))) / DBLE(ni)
           end do
         end do
+        !$omp end parallel do
+        !$omp parallel do collapse(2)
         do i = 1, nk
           do j = 1, nj
             b(j, i) = ((DBLE(i - 1) * DBLE(j - 1))) / DBLE(ni)
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 
@@ -114,6 +120,7 @@
         integer :: i, j, k
 
 !$pragma scop
+        !$omp parallel do collapse(2)
         do i = 1, _PB_NI
           do j = 1, _PB_NJ
             c(j, i) = c(j, i) * beta
@@ -122,6 +129,7 @@
             end do
           end do
         end do
+        !$omp end parallel do
 !$pragma endscop
         end subroutine
 

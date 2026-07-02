@@ -62,12 +62,14 @@
         DATA_TYPE, dimension(ny) :: x
         integer :: nx, ny
         integer :: i, j
+        !$omp parallel do
         do i = 1, ny
           x(i) = DBLE(i - 1) * M_PI
           do j = 1, ny
             a(j, i) = (DBLE((i - 1) * (j))) / nx
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 
@@ -97,9 +99,11 @@
         integer nx, ny, i, j
 
 !$pragma scop
+        !$omp parallel do
         do i = 1, _PB_NY
           y(i) = 0.0D0
         end do
+        !$omp end parallel do
 
         do i = 1, _PB_NX 
           tmp(i) = 0.0D0

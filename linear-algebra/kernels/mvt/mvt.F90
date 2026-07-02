@@ -68,6 +68,7 @@
         integer :: n
         integer :: i, j
 
+        !$omp parallel do
         do i = 1, n
           x1(i) = DBLE(i - 1) / DBLE(n)
           x2(i) = (DBLE(i - 1) + 1.0D0) / DBLE(n)
@@ -77,6 +78,7 @@
             a(j, i) = ((DBLE(i - 1) * DBLE(j - 1))) / DBLE(n)
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 
@@ -110,16 +112,20 @@
         integer :: i, j
 
 !$pragma scop
+        !$omp parallel do
         do i = 1, _PB_N
           do j = 1, _PB_N
             x1(i) = x1(i) + (a(j, i) * y1(j))
           end do
         end do
+        !$omp end parallel do
+        !$omp parallel do
         do i = 1, _PB_N
           do j = 1, _PB_N 
             x2(i) = x2(i) + (a(i, j) * y2(j))
           end do
         end do
+        !$omp end parallel do
 !$pragma endscop
         end subroutine
 

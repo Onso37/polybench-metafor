@@ -58,12 +58,14 @@
         integer :: i, j
 
         alpha = 32412D0
+        !$omp parallel do collapse(2)
         do i = 1, n
           do j = 1, n
             a(j, i) = (DBLE(i - 1) * DBLE(j - 1)) / DBLE(n)
             b(j, i) = ((DBLE(i - 1) * DBLE(j - 1))) / DBLE(n)
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 

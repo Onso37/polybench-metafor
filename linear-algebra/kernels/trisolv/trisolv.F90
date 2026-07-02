@@ -59,6 +59,7 @@
         DATA_TYPE, dimension(n) :: x
         integer :: n
         integer :: i, j
+        !$omp parallel do
         do i = 1, n
           c(i) = DBLE(i - 1) / DBLE(n)
           x(i) = DBLE(i - 1) / DBLE(n)
@@ -66,6 +67,7 @@
             a(j, i) = (DBLE(i - 1) * DBLE(j - 1)) / DBLE(n)
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 

@@ -69,16 +69,20 @@
         integer :: nx, ny
         integer :: i, j
 
+        !$omp parallel do
         do i = 1, ny
           p(i) = DBLE(i - 1) * M_PI
         end do
+        !$omp end parallel do
 
+        !$omp parallel do
         do i = 1, nx
           r(i) = DBLE(i - 1) * M_PI
           do j = 1, ny
             a(j, i) = (DBLE(i - 1) * DBLE(j)) / nx
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 
@@ -118,9 +122,11 @@
         integer :: i,j
 
 !$pragma scop
+        !$omp parallel do
         do i = 1, _PB_NY
           s(i) = 0.0D0
         end do
+        !$omp end parallel do
 
         do i = 1, _PB_NX
           q(i) = 0.0D0

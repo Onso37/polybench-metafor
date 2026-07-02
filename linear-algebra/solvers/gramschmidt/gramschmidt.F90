@@ -59,18 +59,22 @@
         integer :: ni, nj
         integer :: i, j
 
+        !$omp parallel do collapse(2)
         do i = 1, ni 
           do j = 1, nj
             a(j, i) = (DBLE(i - 1) * DBLE(j - 1)) / DBLE(ni)
             q(j, i) = (DBLE(i - 1) * DBLE(j)) / DBLE(nj)
           end do
         end do
+        !$omp end parallel do
 
+        !$omp parallel do collapse(2)
         do i = 1, ni 
           do j = 1, nj
             r(j, i) = (DBLE(i - 1) * DBLE(j + 1)) / DBLE(nj)
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 
@@ -125,13 +129,17 @@
 !$pragma scop
         do k = 1, _PB_NJ
           nrm = 0.0D0
+          !$omp simd reduction(+:nrm)
           do i = 1, _PB_NI
             nrm = nrm + (a(k, i) * a(k, i))
           end do
           r(k, k) = sqrt(nrm)
+          !$omp parallel do
           do i = 1, _PB_NI
             q(k, i) = a(k, i) / r(k, k)
           end do
+          !$omp end parallel do
+          !$omp parallel do private(i)
           do j = k + 1, _PB_NJ
             r(j, k) = 0.0D0
             do i = 1, _PB_NI
@@ -141,6 +149,7 @@
               a(j, i) = a(j, i) - (q(k, i) * r(j, k))
             end do
           end do
+          !$omp end parallel do
         end do
 !$pragma endscop
         end subroutine

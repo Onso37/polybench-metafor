@@ -70,6 +70,7 @@
         integer :: i, j
         integer :: n
 
+        !$omp parallel do
         do i = 1, n
           alpha(i) = i
           beta(i) = (i/n)/DBLE(2.0)
@@ -79,6 +80,7 @@
             sumArray(j,i) = DBLE(i*j)/DBLE(n)
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 
@@ -121,15 +123,19 @@
                                  (r(k - i) * y(k - 1, i))
           end do
           alpha(k) = alpha(k) - (sumArray(k, k) * beta(k))
+          !$omp parallel do
           do i = 1, k - 1
             y(k, i) = y(k - 1, i) + (alpha(k) * y(k - 1, k - i))
           end do
+          !$omp end parallel do
           y(k, k) = alpha(k)
         end do
 
+        !$omp parallel do
         do i = 1, _PB_N
           outArray(i) = y(_PB_N, i)
         end do
+        !$omp end parallel do
 !$pragma endscop
         end subroutine
 

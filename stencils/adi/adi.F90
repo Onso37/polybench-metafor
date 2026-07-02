@@ -59,6 +59,7 @@
         integer :: n
         integer :: i, j
 
+        !$omp parallel do collapse(2)
         do i = 1, n
           do j = 1, n
             x(j, i) = (DBLE((i - 1) * (j)) + 1.0D0) / DBLE(n)
@@ -66,6 +67,7 @@
             b(j, i) = (DBLE((i - 1) * (j + 2)) + 3.0D0) / DBLE(n)
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 
@@ -99,6 +101,7 @@
 
 !$pragma scop
         do t = 1, _PB_TSTEPS
+          !$omp parallel do private(i2)
           do i1 = 1, _PB_N
             do i2 = 2, _PB_N
               x(i2, i1) = x(i2, i1) - ((x(i2 - 1, i1) * a(i2, i1)) / &
@@ -107,11 +110,15 @@
                           b(i2 - 1, i1))
             end do
           end do
+          !$omp end parallel do
 
+          !$omp parallel do
           do i1 = 1, _PB_N
             x(_PB_N, i1) = x(_PB_N, i1) / b(_PB_N, i1)
           end do
+          !$omp end parallel do
 
+          !$omp parallel do private(i2)
           do i1 = 1, _PB_N 
             do i2 = 1, _PB_N - 2
               x(_PB_N - i2, i1) = (x(_PB_N - i2, i1) - &
@@ -120,8 +127,10 @@
                                     b(_PB_N - i2 - 1, i1)
             end do
           end do
+          !$omp end parallel do
 
           do i1 = 2, _PB_N 
+            !$omp parallel do
             do i2 = 1, _PB_N 
               x(i2, i1) = x(i2, i1) - x(i2, i1 - 1) * a(i2, i1) / &
                           b(i2, i1 - 1)
@@ -129,13 +138,17 @@
                           b(i2, i1 - 1)
               
             end do
+            !$omp end parallel do
           end do
 
+          !$omp parallel do
           do i2 = 1, _PB_N
             x(i2, _PB_N) = x(i2, _PB_N) / b(i2, _PB_N)
           end do
+          !$omp end parallel do
 
           do i1 = 1, _PB_N - 2
+            !$omp parallel do
             do i2 = 1, _PB_N
               x(i2, _PB_N - i1) = (x(i2, _PB_N - i1) - &
                                     x(i2, _PB_N - i1 - 1) * &
@@ -143,6 +156,7 @@
                                     b(i2, _PB_N - i1)
             end do
           end do
+          !$omp end parallel do
         end do
 !$pragma endscop
         end subroutine

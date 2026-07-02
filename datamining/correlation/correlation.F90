@@ -64,11 +64,13 @@
         integer :: i, j
 
         float_n = 1.2D0
+        !$omp parallel do collapse(2)
         do i = 1, m 
           do j = 1, n
             dat(j, i) = (DBLE(i - 1) * DBLE(j - 1)) / DBLE(m)
           end do
         end do
+        !$omp end parallel do
         end subroutine
 
 
@@ -105,6 +107,7 @@
         EPS = 0.1D0
 !$pragma scop
 !       Determine mean of column vectors of input data matrix
+        !$omp parallel do
         do j = 1, _PB_M
           mean(j) = 0.0D0
           do i = 1, _PB_N
@@ -112,8 +115,10 @@
           end do
           mean(j) = mean(j) / float_n
         end do
+        !$omp end parallel do
 
 !       Determine standard deviations of column vectors of data matrix.
+        !$omp parallel do
         do j = 1, _PB_M
           stddev(j) = 0.0D0
           do i = 1, _PB_N
@@ -126,16 +131,20 @@
             stddev(j) = 1.0D0
           endif
         end do
+        !$omp end parallel do
 
 !       Center and reduce the column vectors.
+        !$omp parallel do collapse(2)
         do i = 1, _PB_N
           do j = 1, _PB_M
             dat(j, i) = dat(j, i) - mean(j)
             dat(j, i) = dat(j, i) / (sqrt(float_n) * stddev(j))
           end do
         end do
+        !$omp end parallel do
 
 !       Calculate the m * m correlation matrix.
+        !$omp parallel do private(i, j2)
         do j1 = 1, _PB_M - 1 
           symmat(j1, j1) = 1.0D0
           do j2 = j1 + 1, _PB_M 
@@ -146,6 +155,7 @@
             symmat(j1, j2) = symmat(j2, j1)
           end do
         end do
+        !$omp end parallel do
         symmat(_PB_M, _PB_M) = 1.0D0
 !$pragma endscop
         end subroutine

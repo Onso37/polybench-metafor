@@ -8,12 +8,12 @@ UTILITIES_DIR="$(pwd)/utilities"
 
 # --- OPENMP FLAGS ---
 # Add -fopenmp to both Fortran and C flags
-FFLAGS="$OPTIMIZATION -fopenmp -Wno-ignored-directive"
+FFLAGS="$OPTIMIZATION -fopenmp -Wno-ignored-directive " # -mllvm -polly -mllvm -polly-parallel -mllvm -polly-omp-backend=LLVM"
 CFLAGS="-O3 -fopenmp"
 
 # IMPORTANT: These must match the flags you used during preprocessing
 # Especially -DPOLYBENCH_TIME
-PARGS="-DSMALL_DATASET -DPOLYBENCH_DUMP_ARRAYS"
+PARGS="-DPOLYBENCH_TIME -DEXTRALARGE_DATASET"
 
 echo "Step 1: Compiling C utilities..."
 $CC -c $PARGS $CFLAGS "$UTILITIES_DIR/fpolybench.c" -I "$UTILITIES_DIR" -o "$UTILITIES_DIR/fpolybench.o"

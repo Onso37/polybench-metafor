@@ -1,0 +1,58 @@
+
+
+ NAS Parallel Benchmarks (NPB3.3-SER) - CG Benchmark
+
+ Size:        7000
+ Iterations:    15
+
+ Initialization time =           0.087 seconds
+
+   iteration           ||r||                 zeta
+        1       0.17251322566517E-12    11.9997003727381
+        2       0.22170593157099E-14    10.3457275664058
+        3       0.21943839552581E-14    10.3617880137963
+        4       0.22231561435783E-14    10.3625416284965
+        5       0.22176348102448E-14    10.3625905854467
+        6       0.21710668945683E-14    10.3625946467087
+        7       0.21825351439555E-14    10.3625950398342
+        8       0.21348311874108E-14    10.3625950817269
+        9       0.20953075343904E-14    10.3625950864815
+       10       0.21480803329296E-14    10.3625950870452
+       11       0.21321081051236E-14    10.3625950871141
+       12       0.20892340370606E-14    10.3625950871227
+       13       0.21071559246826E-14    10.3625950871238
+       14       0.20353340758339E-14    10.3625950871240
+       15       0.20221025438482E-14    10.3625950871240
+ Benchmark completed 
+ VERIFICATION SUCCESSFUL 
+ Zeta is     0.1036259508712E+02
+ Error is    0.8571003809690E-15
+
+
+ CG Benchmark Completed.
+ Class           =                        W
+ Size            =                     7000
+ Iterations      =                       15
+ Time in seconds =                     0.06
+ Mop/s total     =                  6748.54
+ Operation type  =           floating point
+ Verification    =               SUCCESSFUL
+ Version         =                        3
+ Compile date    =                        1
+
+ Compile options:
+    F77          = f
+    FLINK        = $
+    F_LIB        = (
+    F_INC        = (
+    FFLAGS       = -
+    FLINKFLAGS   = -
+    RAND         = r
+
+
+ Please send all errors/feedbacks to:
+
+ NPB Development Team
+ npb@nas.nasa.gov
+
+

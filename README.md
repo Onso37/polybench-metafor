@@ -2,6 +2,8 @@
 
 Contains the source code of PolyBench/Fortran, as well as scripts used for the reproduction of Metafor-AutoPar results.
 
+Also includes the execution times of our evaluation process in a dual socket system, as well as results for one of the NAS Parallel Benchmarks (CG).
+
 ## Included Scripts
 
 - `preproc.sh`: Creates a preprocessed version of each benchmark (stripped of C macros)
